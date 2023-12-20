@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3rd Page</title>
+    <style>/* Reset default margin and padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          /* Set the font and colors */
+          body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #ECF39E; /* Sage green background */
+            color: #132A13; /* Dark text color */
+          }
+          
+          /* Coin container styles */
+          #coinInfo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+          }
+          
+          /* Coin card styles */
+          .coin {
+            background-color: #FFFFFF;
+            border: 1px solid #90A955;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px;
+            width: 250px;
+            background:'90A955';
+            align-items: center;
+          }
+          
+          /* Search input styles */
+          #coinSearch {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-family: 'Ubuntu', sans-serif;
+            border: 1px solid #4F772D;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #31572C;
+            color: #FFFFFF;
+          }
+          </style>
+</head>
+
+<body>
+    <a href="index.html">Home</a>
+    <input type="text" id="coinSearch" placeholder="Search for a coin">
+
+    <!-- Container to display coin information -->
+    <div id="coinInfo"></div>
+    <script>
+        const coinInfoContainer = document.getElementById("coinInfo");
+        const coinSearchInput = document.getElementById("coinSearch");
+
+
+        function createCoinElement(coinSymbol) {
+            const coinDiv = document.createElement("div");
+            coinDiv.classList.add("coin");
+
+            const coinName = document.createElement("p");
+            coinName.innerText = `Name: ${coinSymbol}`;
+            coinDiv.appendChild(coinName);
+
+            const priceChange = document.createElement("p");
+            priceChange.innerText = "Price Change: ";
+            const priceChangeValue = document.createElement("span");
+            priceChange.appendChild(priceChangeValue);
+            coinDiv.appendChild(priceChange);
+
+            const lastPrice = document.createElement("p");
+            lastPrice.innerText = "Last Price: ";
+            const lastPriceValue = document.createElement("span");
+            lastPrice.appendChild(lastPriceValue);
+            coinDiv.appendChild(lastPrice);
+
+            const high = document.createElement("p");
+            high.innerText = "High: ";
+            const highValue = document.createElement("span");
+            high.appendChild(highValue);
+            coinDiv.appendChild(high);
+
+            const low = document.createElement("p");
+            low.innerText = "Low: ";
+            const lowValue = document.createElement("span");
+            low.appendChild(lowValue);
+            coinDiv.appendChild(low);
+
+            const percentage = document.createElement("p");
+            percentage.innerText = "Percentage: ";
+            const percentageValue = document.createElement("span");
+            percentage.appendChild(percentageValue);
+            coinDiv.appendChild(percentage);
+
+            coinInfoContainer.appendChild(coinDiv);
+
+            return {
+                coinDiv,
+                coinSymbol,
+                priceChange: priceChangeValue,
+                lastPrice: lastPriceValue,
+                high: highValue,
+                low: lowValue,
+                percentage: percentageValue
+            };
+        }
+
+        const coins = {};
+
+        const tickerSymbols = [
+            'nbsusdt', 'ncousdt', 'neousdt', 'nimusdt', 'nkousdt',
+            'nulsusdt', 'oceanusdt', 'ognusdt', 'ogousdt', 'omgusdt',
+            'oneusdt', 'ongusdt', 'ontusdt', 'oxtusdt', 'paxgusdt',
+            'paxusdt', 'perlusdt', 'perpusdt', 'phbusdt', 'pntusdt',
+            'polyusdt', 'powrusdt', 'pundixusdt', 'qkcusdt', 'qlcusdt',
+            'qntusdt', 'qtumusdt', 'renusdt', 'repusdt', 'reefusdt',
+            'rlcusdt', 'rsrusdt', 'rvnusdt', 'sandusdt', 'scusdt',
+            'sfpusdt', 'shibusdt', 'snxusdt', 'solusdt', 'srmusdt',
+            'storjusdt', 'stptusdt', 'straxusdt', 'stxusdt', 'sushiusdt',
+            'sxpusdt', 'sysusdt', 'taibusdt', 'tctusdt', 'tfuelusdt',
+            'thetausdt', 'titanusdt', 'tktusdt', 'tlmusdt', 'tntusdt',
+            'tomousdt'
+
+        ]
+
+
+
+
+        const streams = tickerSymbols.map(symbol => `${symbol}@ticker`).join('/');
+
+        const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const coinSymbol = data.data.s;
+
+            if (!coins[coinSymbol]) {
+                coins[coinSymbol] = createCoinElement(coinSymbol);
+            }
+
+            const coinData = data.data;
+            coins[coinSymbol].priceChange.innerText = parseFloat(coinData.p).toFixed(4);
+            coins[coinSymbol].lastPrice.innerText = parseFloat(coinData.c).toFixed(4);
+            coins[coinSymbol].high.innerText = parseFloat(coinData.h).toFixed(4);
+            coins[coinSymbol].low.innerText = parseFloat(coinData.l).toFixed(4);
+
+            const lastPrice = parseFloat(coinData.c);
+            const highValue = parseFloat(coinData.h);
+            const diff = highValue - lastPrice;
+            const percentageChange = ((diff / highValue) * 100).toFixed(2); // Calculate percentage
+            coins[coinSymbol].percentage.innerText = percentageChange;
+
+            const coinElements = Object.values(coins);
+            coinElements.sort((coinA, coinB) => {
+                const percentageChangeA = parseFloat(coinA.percentage.innerText);
+                const percentageChangeB = parseFloat(coinB.percentage.innerText);
+                return percentageChangeA - percentageChangeB;
+            });
+
+            coinInfoContainer.innerHTML = '';
+            coinElements.forEach(coin => {
+                coinInfoContainer.appendChild(coin.coinDiv);
+            });
+        };
+
+        function filterCoins(searchTerm) {
+            const coinElements = Object.values(coins);
+
+            coinElements.forEach(coin => {
+                const coinName = coin.coinSymbol.toLowerCase();
+                const display = coinName.includes(searchTerm.toLowerCase()) ? "block" : "none";
+                coin.coinDiv.style.display = display;
+            });
+        }
+
+        // Event listener for input change in the search field
+        coinSearchInput.addEventListener("input", () => {
+            const searchValue = coinSearchInput.value.trim();
+            filterCoins(searchValue);
+        });
+
+    </script>
+</body>
+
+</html>

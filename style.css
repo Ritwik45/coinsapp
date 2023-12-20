@@ -1,0 +1,48 @@
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Set the font and colors */
+  body {
+    font-family: 'Ubuntu', sans-serif;
+    background-color: #ECF39E; /* Sage green background */
+    color: #132A13; /* Dark text color */
+  }
+  
+  /* Coin container styles */
+  #coinInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  /* Coin card styles */
+  .coin {
+    background-color: #FFFFFF;
+    border: 1px solid #90A955;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px;
+    width: 250px;
+    background:'90A955';
+    align-items: center;
+  }
+  
+  /* Search input styles */
+  #coinSearch {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-family: 'Ubuntu', sans-serif;
+    border: 1px solid #4F772D;
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #31572C;
+    color: #FFFFFF;
+  }
+  
